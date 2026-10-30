@@ -3,3 +3,8 @@ __pycache__/
 data/raw/*.mat
 data/raw/*.zip
 .DS_Store
+analytics/target/
+analytics/logs/
+analytics/dbt_packages/
+warehouse/
+.user.yml

@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: stg_cycles
+    description: Completed NASA discharge cycles at one row per cell and cycle.
+    columns:
+      - name: cycle_id
+        data_tests: [unique, not_null]
+      - name: capacity_ah
+        data_tests: [not_null]
+  - name: fct_forecasts
+    description: Held-out ten-cycle forecasts joined to verified origin and target measurements.
+    columns:
+      - name: forecast_id
+        data_tests: [unique, not_null]
+      - name: origin_capacity_ah
+        data_tests: [not_null]
+      - name: target_capacity_ah
+        data_tests: [not_null]
+  - name: mart_metrics
+    description: Governed metric definitions aggregated by cell and across all forecast windows.
+    columns:
+      - name: cell
+        data_tests: [unique, not_null]
+      - name: mae_ah
+        data_tests: [not_null]

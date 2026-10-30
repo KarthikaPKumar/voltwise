@@ -1,0 +1,151 @@
+{
+  "generated_at": "2026-10-30T18:25:50.492575+00:00",
+  "mode": "offline laboratory evaluation snapshot",
+  "source_sha256": "35637e2ae2f9ca9dd463bf48ce45b50b80250ce86233bce71c95ed4cbe1c4d83",
+  "catalog": {
+    "forecast_count": {
+      "label": "Evaluated forecasts",
+      "expression": "count(*)",
+      "unit": "forecasts",
+      "description": "Number of eligible held-out forecast windows; windows overlap and are not independent batteries."
+    },
+    "mae_ah": {
+      "label": "Forecast error",
+      "expression": "avg(abs(prediction - actual))",
+      "unit": "Ah",
+      "description": "Mean absolute error of the held-out random forest capacity forecast, ten discharge cycles ahead. Lower is better."
+    },
+    "rmse_ah": {
+      "label": "Root mean squared error",
+      "expression": "sqrt(avg(power(prediction - actual, 2)))",
+      "unit": "Ah",
+      "description": "Root mean squared error; emphasises larger forecast errors."
+    },
+    "baseline_mae_ah": {
+      "label": "Baseline error",
+      "expression": "avg(abs(persistence - actual))",
+      "unit": "Ah",
+      "description": "Mean absolute error when future capacity is predicted to stay unchanged."
+    },
+    "improvement_pct": {
+      "label": "Improvement over baseline",
+      "expression": "100.0 * (1 - avg(abs(prediction - actual)) / nullif(avg(abs(persistence - actual)), 0))",
+      "unit": "percent",
+      "description": "Relative reduction in pooled mean absolute error versus persistence. Ratio of aggregate errors, never an average of per-cell percentages."
+    },
+    "bias_ah": {
+      "label": "Forecast bias",
+      "expression": "avg(prediction - actual)",
+      "unit": "Ah",
+      "description": "Positive means capacity is overestimated; negative means underestimated."
+    },
+    "review_flag_rate_pct": {
+      "label": "Historical review flag rate",
+      "expression": "100.0 * avg(case when prediction < 1.6 then 1.0 else 0.0 end)",
+      "unit": "percent of forecast windows",
+      "description": "Fraction of held-out forecast windows below an illustrative 80% of 2 Ah threshold. Not the percentage of fleet vehicles needing replacement."
+    },
+    "flag_precision_pct": {
+      "label": "Historical review flag precision",
+      "expression": "100.0 * sum(case when prediction < 1.6 and actual < 1.6 then 1 else 0 end) / nullif(sum(case when prediction < 1.6 then 1 else 0 end), 0)",
+      "unit": "percent",
+      "description": "Among predicted-below-threshold windows, proportion actually below 1.6 Ah at the target cycle. Null if no flags. Not a safety classifier."
+    }
+  },
+  "rows": [
+    {
+      "cell": "B0005",
+      "forecast_count": 149,
+      "mae_ah": 0.02077714492340013,
+      "rmse_ah": 0.02523997914924172,
+      "baseline_mae_ah": 0.03758891622979105,
+      "improvement_pct": 44.72534191626085,
+      "bias_ah": -0.002656524081970441,
+      "review_flag_rate_pct": 60.40268456375839,
+      "flag_precision_pct": 98.88888888888889
+    },
+    {
+      "cell": "B0006",
+      "forecast_count": 149,
+      "mae_ah": 0.029716495771317925,
+      "rmse_ah": 0.03888694278845346,
+      "baseline_mae_ah": 0.055619576518298804,
+      "improvement_pct": 46.571876969359494,
+      "bias_ah": 0.011431077099349752,
+      "review_flag_rate_pct": 68.45637583892618,
+      "flag_precision_pct": 100.0
+    },
+    {
+      "cell": "B0007",
+      "forecast_count": 149,
+      "mae_ah": 0.012253501271634578,
+      "rmse_ah": 0.016643541302597573,
+      "baseline_mae_ah": 0.03250839435948713,
+      "improvement_pct": 62.306654902325064,
+      "bias_ah": -0.006173929303352072,
+      "review_flag_rate_pct": 53.691275167785236,
+      "flag_precision_pct": 96.25
+    },
+    {
+      "cell": "B0018",
+      "forecast_count": 113,
+      "mae_ah": 0.0366200814270208,
+      "rmse_ah": 0.04713904964563232,
+      "baseline_mae_ah": 0.05018470338109997,
+      "improvement_pct": 27.02939549342387,
+      "bias_ah": -0.003419271801039555,
+      "review_flag_rate_pct": 71.68141592920354,
+      "flag_precision_pct": 90.12345679012346
+    },
+    {
+      "cell": "__all__",
+      "forecast_count": 560,
+      "mae_ah": 0.02408463098971409,
+      "rmse_ah": 0.03307482485461286,
+      "baseline_mae_ah": 0.04357622796623798,
+      "improvement_pct": 44.72988573408787,
+      "bias_ah": 1.991464058194646e-06,
+      "review_flag_rate_pct": 63.035714285714285,
+      "flag_precision_pct": 96.60056657223797
+    }
+  ],
+  "quality": {
+    "passed": 13,
+    "failed": 0,
+    "invocation_id": "2545fe78-9ce2-458e-936e-5e20f51365f7"
+  },
+  "lineage": [
+    {
+      "name": "fct_forecasts",
+      "type": "model",
+      "depends_on": [
+        "seed.voltwise.forecasts",
+        "model.voltwise.stg_cycles"
+      ]
+    },
+    {
+      "name": "mart_metrics",
+      "type": "model",
+      "depends_on": [
+        "model.voltwise.fct_forecasts"
+      ]
+    },
+    {
+      "name": "stg_cycles",
+      "type": "model",
+      "depends_on": [
+        "seed.voltwise.cycles"
+      ]
+    },
+    {
+      "name": "forecasts",
+      "type": "seed",
+      "depends_on": []
+    },
+    {
+      "name": "cycles",
+      "type": "seed",
+      "depends_on": []
+    }
+  ]
+}

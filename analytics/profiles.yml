@@ -1,0 +1,7 @@
+voltwise:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('VOLTWISE_DB_PATH', '../warehouse/voltwise.duckdb') }}"
+      threads: 1

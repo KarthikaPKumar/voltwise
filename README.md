@@ -8,7 +8,15 @@ An applied data-science project by Kathy: forecast lithium-ion cell capacity **t
 - Rolling history features, a random forest that predicts capacity change, persistence and linear-trend baselines.
 - Leave-one-battery-out evaluation: every test battery is entirely excluded from its fold's training set.
 - An interactive static dashboard, held-out forecasts, per-cell errors, permutation importance, and browser-local CSV inference with training-range checks.
-- A portable JSON model, data fingerprints, automated tests and a model card. No cloud account, database, API key or paid service is needed.
+- A portable JSON model, data fingerprints, automated tests and a model card. The public demo needs no cloud account, API key or paid service. Its build uses an embedded DuckDB database.
+
+## Analytics and AI extension
+
+The project now includes **dbt + DuckDB**, a shared semantic metric catalogue, a **FastAPI** read-only metrics service, and an optional **Ollama tool-calling agent**. The dashboard exposes eight named metrics and guided investigations, with SQL definitions, test evidence and data lineage.
+
+Run `python scripts/build_analytics.py` after installing requirements. It builds two seeds, three models and 13 dbt tests, then publishes `docs/analytics.json`. CI runs the same pipeline before deploying. To run the optional local AI edition, follow [ARCHITECTURE.md](ARCHITECTURE.md). A local tool-capable model must be installed and configured separately; the public GitHub Pages site does not host an LLM.
+
+The semantic layer is a custom catalogue built on dbt, not a hosted MetricFlow service. Public guided answers are deterministic and labelled accordingly. The actual local agent chooses tools, observes evidence and returns a sourced interpretation; tests use a mock model until a real model is configured. Generated interpretations still need review.
 
 ## Results
 
@@ -32,8 +40,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/download.py
 python scripts/train.py
+python scripts/build_analytics.py
 python -m unittest discover -s tests -p 'test_*.py'
-node --test tests/inference.test.mjs
+node --test tests/*.test.mjs
 python -m http.server 8766 --directory docs
 ```
 

@@ -1,0 +1,54 @@
+name: voltwise
+version: '1.0.0'
+config-version: 2
+profile: voltwise
+flags:
+  send_anonymous_usage_stats: false
+model-paths: [models]
+seed-paths: [seeds, ../data]
+test-paths: [tests]
+models:
+  voltwise:
+    +materialized: table
+vars:
+  semantic_metrics:
+    forecast_count:
+      label: Evaluated forecasts
+      expression: count(*)
+      unit: forecasts
+      description: Number of eligible held-out forecast windows; windows overlap and are not independent batteries.
+    mae_ah:
+      label: Forecast error
+      expression: avg(abs(prediction - actual))
+      unit: Ah
+      description: Mean absolute error of the held-out random forest capacity forecast, ten discharge cycles ahead. Lower is better.
+    rmse_ah:
+      label: Root mean squared error
+      expression: sqrt(avg(power(prediction - actual, 2)))
+      unit: Ah
+      description: Root mean squared error; emphasises larger forecast errors.
+    baseline_mae_ah:
+      label: Baseline error
+      expression: avg(abs(persistence - actual))
+      unit: Ah
+      description: Mean absolute error when future capacity is predicted to stay unchanged.
+    improvement_pct:
+      label: Improvement over baseline
+      expression: 100.0 * (1 - avg(abs(prediction - actual)) / nullif(avg(abs(persistence - actual)), 0))
+      unit: percent
+      description: Relative reduction in pooled mean absolute error versus persistence. Ratio of aggregate errors, never an average of per-cell percentages.
+    bias_ah:
+      label: Forecast bias
+      expression: avg(prediction - actual)
+      unit: Ah
+      description: Positive means capacity is overestimated; negative means underestimated.
+    review_flag_rate_pct:
+      label: Historical review flag rate
+      expression: 100.0 * avg(case when prediction < 1.6 then 1.0 else 0.0 end)
+      unit: percent of forecast windows
+      description: Fraction of held-out forecast windows below an illustrative 80% of 2 Ah threshold. Not the percentage of fleet vehicles needing replacement.
+    flag_precision_pct:
+      label: Historical review flag precision
+      expression: 100.0 * sum(case when prediction < 1.6 and actual < 1.6 then 1 else 0 end) / nullif(sum(case when prediction < 1.6 then 1 else 0 end), 0)
+      unit: percent
+      description: Among predicted-below-threshold windows, proportion actually below 1.6 Ah at the target cycle. Null if no flags. Not a safety classifier.
