@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+data/raw/*.mat
+data/raw/*.zip
+.DS_Store
