@@ -16,7 +16,7 @@ The project now includes **dbt + DuckDB**, a shared semantic metric catalogue, a
 
 Run `python scripts/build_analytics.py` after installing requirements. It builds two seeds, three models and 13 dbt tests, then publishes `docs/analytics.json`. CI runs the same pipeline before deploying. To run the optional local AI edition, follow [ARCHITECTURE.md](ARCHITECTURE.md). A local tool-capable model must be installed and configured separately; the public GitHub Pages site does not host an LLM.
 
-The semantic layer is a custom catalogue built on dbt, not a hosted MetricFlow service. Public guided answers are deterministic and labelled accordingly. The actual local agent chooses tools, observes evidence and returns a sourced interpretation; tests use a mock model until a real model is configured. Generated interpretations still need review.
+The semantic layer is a custom catalogue built on dbt, not a hosted MetricFlow service. Public guided answers are deterministic and labelled accordingly. The actual local agent chooses tools, observes evidence and returns a sourced interpretation; automated unit tests use a mock model, with real-model checks recorded separately. Generated interpretations still need review.
 
 ## Results
 

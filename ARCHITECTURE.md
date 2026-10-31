@@ -26,6 +26,12 @@ The response includes tool arguments, sources and elapsed time. Tool results are
 
 ## Start the local edition
 
+On the configured Mac, double-click `Start Voltwise.command`, then open http://127.0.0.1:8766/#local-agent. Keep the launcher window open while using the assistant. It starts Qwen2.5 7B through Ollama and the local web service. Control-C stops the services it started; an Ollama instance already running before the launcher is left alone. The model is stored by Ollama on this computer and is not uploaded to GitHub.
+
+The default is `qwen2.5:7b` (approximately 4.7 GB), with tool calling, an 8,192-token context and short final responses. Override `VOLTWISE_OLLAMA_MODEL` only with an installed compatible model. The launcher disables Ollama cloud features when it starts the model server.
+
+For a fresh checkout:
+
 ```sh
 pip install -r requirements.txt
 python scripts/build_analytics.py
@@ -39,6 +45,6 @@ Open http://127.0.0.1:8766 for the dashboard and local AI form. API documentatio
 
 ## Observability and verification
 
-The public analytics JSON carries data-test counts, dbt lineage, build time and the model-results checksum. Each agent response carries its tool trace and latency. These are build/interaction diagnostics, not continuous live production monitoring. CI rebuilds the warehouse and snapshot, tests the API/tools and checks that SQL metrics match Python evaluation. Mock-model tests exercise agent decisions, bounds and errors; they do not establish the accuracy of any installed language model.
+The public analytics JSON carries data-test counts, dbt lineage, build time and the model-results checksum. Each agent response carries its tool trace and latency. These are build/interaction diagnostics, not continuous live production monitoring. CI rebuilds the warehouse and snapshot, tests the API/tools and checks that SQL metrics match Python evaluation. Mock-model tests exercise agent decisions, bounds and errors. A real Qwen2.5 7B smoke test on 31 October 2026 retrieved and correctly compared B0005 and B0018 MAE in about 13 seconds; evidence is in `reports/local-ai-smoke.json`. This limited check does not establish general answer accuracy. Qwen3 4B failed completion tests in this environment and is not the default. Truncated output and catalogue-only answers are rejected; invalid tool arguments receive bounded correction feedback without executing the invalid request.
 
 References: https://github.com/duckdb/dbt-duckdb and https://docs.ollama.com/capabilities/tool-calling

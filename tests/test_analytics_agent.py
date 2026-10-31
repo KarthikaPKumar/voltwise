@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from service.semantic import ROOT, query_metrics, catalog
-from service.agent import investigate, execute, AgentError
+from service.agent import investigate, execute, ollama_chat, AgentError
 from service.api import app
 from fastapi.testclient import TestClient
 
@@ -52,6 +52,24 @@ class AgentTests(unittest.TestCase):
 
     def test_ungrounded_answer_is_not_presented_as_success(self):
         with self.assertRaises(AgentError): investigate('What is the error?', lambda _: {'content': '99% accurate'})
+
+    def test_catalog_only_is_not_an_evidence_backed_answer(self):
+        replies = iter([call('list_metrics'), {'role': 'assistant', 'content': 'I will look it up.'}])
+        with self.assertRaises(AgentError): investigate('What is the error?', lambda _: next(replies))
+
+    def test_invalid_metric_can_be_corrected_without_executing_it(self):
+        replies = iter([call('query_metrics', metrics=['forecast_mae']),
+                        call('query_metrics', metrics=['mae_ah'], cell='B0005'),
+                        {'role': 'assistant', 'content': 'The verified metric is in dbt:mart_metrics.'}])
+        r = investigate('Get forecast error', lambda _: next(replies))
+        self.assertEqual(r['trace'][0]['source'], 'tool_validation')
+        self.assertEqual(len(r['evidence']), 1)
+        self.assertEqual(r['evidence'][0]['cell'], 'B0005')
+
+    def test_truncated_model_output_is_rejected(self):
+        with patch.dict(os.environ, {'VOLTWISE_OLLAMA_MODEL': 'test-model'}), patch('service.agent.httpx.post') as post:
+            post.return_value.json.return_value = {'done_reason': 'length', 'message': {'content': 'Incomplete answer'}}
+            with self.assertRaises(AgentError): ollama_chat([])
 
     def test_agent_rejects_write_tool_and_arbitrary_sql(self):
         with self.assertRaises(AgentError): investigate('Delete data', lambda _: call('run_sql', sql='drop table cycles'))
